@@ -5,12 +5,15 @@ package org.jetbrains.hackathon2024
 
 import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.jetbrains.hackathon2024.attributes.setUpAttribute
 
 /**
  * A simple 'hello world' plugin.
  */
 class KapiFencePlugin: Plugin<Project> {
     override fun apply(project: Project) {
+
+        project.setUpAttribute()
         // Register a task
         project.tasks.register("greeting") { task ->
             task.doLast {
