@@ -19,3 +19,4 @@ class KapiFencePlugin: Plugin<Project> {
         }
     }
 }
+

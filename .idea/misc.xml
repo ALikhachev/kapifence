@@ -7,13 +7,4 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="corretto-1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
-  <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <created>1687979935487</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1687979935487</updated>
-    </task>
-    <servers />
-  </component>
 </project>
