@@ -7,6 +7,14 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation(libs.asm)
+    implementation(libs.proguard.base)
+    implementation(libs.kotlin.metadata)
+    runtimeOnly("com.guardsquare:proguard-base:7.5.0")
+
+}
+
 testing {
     suites {
         val test by getting(JvmTestSuite::class) {

@@ -1,8 +1,14 @@
 [versions]
 kotlin = "2.0.20"
+asm = "9.7"
+#proguard-core = "9.1.6"
+proguard-base = "7.5.0"
+kotlin-metadata = "2.0.20"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+kotlin-metadata = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin-metadata" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
