@@ -1,5 +1,6 @@
 package org.jetbrains.hackathon2024.visitor
 
+import org.jetbrains.hackathon2024.utils.parseClassFile
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import proguard.util.ClassNameParser
@@ -15,6 +16,7 @@ class DeprecatingClassVisitorTest {
     fun testClassVisitor() {
         val classFilePath = "build/classes/kotlin/test/org/jetbrains/hackathon2024/test/ClassToBeDeprecated.class"
         val someClass = File(classFilePath)
+        val outputFile = kotlin.io.path.createTempFile(suffix = ".class").toFile()
         someClass.inputStream().use { inputStream ->
             val classReader = ClassReader(inputStream)
             val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES)
@@ -24,9 +26,9 @@ class DeprecatingClassVisitorTest {
                 ClassNameParser().parse("org/jetbrains/hackathon2024/**")
             )
             classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
-            someClass.writeBytes(classWriter.toByteArray())
+            outputFile.writeBytes(classWriter.toByteArray())
         }
-        val parsedClassFile = parseClassFile(classFilePath)
+        val parsedClassFile = parseClassFile(outputFile.absolutePath)
         assert(
             parsedClassFile.contains(
                 """
@@ -47,19 +49,5 @@ class DeprecatingClassVisitorTest {
         ) {
             "ClassVisitor should add kotlin.Deprecated annotation, but it didn't.\n$parsedClassFile"
         }
-    }
-
-    private fun parseClassFile(pathToClassFile: String): String {
-        val processBuilder = ProcessBuilder(
-            "javap",
-            "-v",
-            pathToClassFile,
-        )
-        processBuilder.redirectErrorStream()
-        val process = processBuilder.start()
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        process.waitFor()
-
-        return reader.lines().collect(Collectors.joining("\n"))
     }
 }

@@ -15,8 +15,6 @@ dependencies {
     implementation(libs.asm)
     implementation(libs.proguard.base)
     implementation(libs.kotlin.metadata)
-    testImplementation(libs.junit.jupiter)
-
 }
 
 kotlin {

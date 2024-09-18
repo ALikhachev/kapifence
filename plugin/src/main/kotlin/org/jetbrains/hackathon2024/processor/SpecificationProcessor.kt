@@ -1,7 +1,8 @@
 package org.jetbrains.hackathon2024.processor
 
+import org.jetbrains.hackathon2024.visitor.DeprecatingClassFields
 import org.jetbrains.hackathon2024.visitor.DeprecatingClassVisitor
-import org.jetbrains.hackathon2024.visitor.DeprecatingMethodVisitor
+import org.jetbrains.hackathon2024.visitor.DeprecatingClassMethodVisitor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import proguard.KeepClassSpecification
@@ -21,16 +22,19 @@ class SpecificationProcessor {
             when {
                 specification.methodSpecifications?.isNotEmpty() ?: false -> {
                     val matchers = specification.methodSpecifications.map { methodSpecification ->
-                        NameParser().parse(methodSpecification.descriptor)
+                        ClassNameParser().parse(methodSpecification.name) to NameParser().parse(methodSpecification.descriptor)
                     }
                     classReader.accept(
-                        DeprecatingMethodVisitor(cw, deprecationMessage, matchers),
+                        DeprecatingClassMethodVisitor(cw, deprecationMessage, specification.methodSpecifications),
                         ClassReader.EXPAND_FRAMES
                     )
                 }
 
                 specification.fieldSpecifications?.isNotEmpty() ?: false -> {
-                    // TODO(Dmitrii Krasnov): fields is not empty
+                    classReader.accept(
+                        DeprecatingClassFields(cw, deprecationMessage, specification.fieldSpecifications),
+                        ClassReader.EXPAND_FRAMES
+                    )
                 }
 
                 else -> {
