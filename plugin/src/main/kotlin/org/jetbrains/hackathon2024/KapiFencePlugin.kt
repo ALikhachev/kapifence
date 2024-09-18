@@ -6,18 +6,11 @@ package org.jetbrains.hackathon2024
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 
-/**
- * A simple 'hello world' plugin.
- */
-class KapiFencePlugin: Plugin<Project> {
+class KapiFencePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        project.configureDeprecationsAttribute()
-        project.registerDeprecationsTransform()
-        // Register a task
-        project.tasks.register("greeting") { task ->
-            task.doLast {
-                println("Hello from plugin 'org.example.greeting'")
-            }
+        with(project) {
+            configureDeprecationsAttribute()
+            registerDeprecationsTransform()
         }
     }
 }

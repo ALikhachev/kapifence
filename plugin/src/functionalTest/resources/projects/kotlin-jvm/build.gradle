@@ -1,0 +1,14 @@
+plugins {
+    id("org.jetbrains.hackathon2024.kapifence")
+    id("org.jetbrains.kotlin.jvm") version "2.0.20"
+}
+
+repositories {
+    mavenCentral()
+}
+
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors = true
+    }
+}

@@ -1,0 +1,16 @@
+plugins {
+    id("org.jetbrains.hackathon2024.kapifence")
+    id("java")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.20")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xlint:deprecation' << '-Werror'
+}
