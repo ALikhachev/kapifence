@@ -1,5 +1,6 @@
 package org.jetbrains.hackathon2024.processor
 
+import org.jetbrains.hackathon2024.visitor.DeprecatingClassFields
 import org.jetbrains.hackathon2024.visitor.DeprecatingClassVisitor
 import org.jetbrains.hackathon2024.visitor.DeprecatingClassMethodVisitor
 import org.objectweb.asm.ClassReader
@@ -30,7 +31,10 @@ class SpecificationProcessor {
                 }
 
                 specification.fieldSpecifications?.isNotEmpty() ?: false -> {
-                    // TODO(Dmitrii Krasnov): fields is not empty
+                    classReader.accept(
+                        DeprecatingClassFields(cw, deprecationMessage, specification.fieldSpecifications),
+                        ClassReader.EXPAND_FRAMES
+                    )
                 }
 
                 else -> {
