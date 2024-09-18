@@ -1,51 +1,45 @@
-package org.jetbrains.hackathon2024.bytecode
+package org.jetbrains.hackathon2024.visitor
 
 import org.objectweb.asm.AnnotationVisitor
-import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import proguard.util.StringMatcher
 import kotlin.metadata.hasAnnotations
 import kotlin.metadata.jvm.KotlinClassMetadata
 
-class DeprecatingClassTransformer(
-    cv: ClassWriter,
+class DeprecatingClassVisitor(
+    classWriter: ClassWriter,
     private val deprecationMessage: String,
-    private val processedClassCallback: (className: String) -> Unit = {},
-) : ClassVisitor(Opcodes.ASM9, cv) {
+    private val matcher: StringMatcher
+) : BaseVisitor(classWriter) {
     private var isAlreadyDeprecated = false
+    private var shouldApplyChanges = false
 
     override fun visit(
         version: Int, access: Int, name: String, signature: String?, superName: String?,
         interfaces: Array<out String>?,
     ) {
-        processedClassCallback(name.replace('/', '.'))
-        val deprecatedAccess = access or Opcodes.ACC_DEPRECATED
-        super.visit(version, deprecatedAccess, name, signature, superName, interfaces)
-    }
-
-    override fun visitMethod(
-        access: Int,
-        name: String?,
-        descriptor: String?,
-        signature: String?,
-        exceptions: Array<out String?>?
-    ): MethodVisitor? {
-
-        return super.visitMethod(access, name, descriptor, signature, exceptions)
+        shouldApplyChanges = matcher.matches(name)
+        val resultingAccessFlags =
+            if (shouldApplyChanges) access or Opcodes.ACC_DEPRECATED else access
+        super.visit(version, resultingAccessFlags, name, signature, superName, interfaces)
     }
 
     override fun visitAnnotation(desc: String, visible: Boolean): AnnotationVisitor? {
-        when (desc) {
-            DEPRECATED_ANNOTATION_DESC -> isAlreadyDeprecated = true
-            METADATA_ANNOTATION_DESC -> return MetadataAnnotationVisitor()
+        return when {
+            shouldApplyChanges && desc == DEPRECATED_ANNOTATION_DESC -> {
+                isAlreadyDeprecated = true
+                super.visitAnnotation(desc, visible)
+            }
+            shouldApplyChanges && desc == METADATA_ANNOTATION_DESC -> return MetadataAnnotationVisitor()
+            else -> super.visitAnnotation(desc, visible)
         }
-        return super.visitAnnotation(desc, visible)
     }
 
     override fun visitEnd() {
         super.visitEnd()
-        if (!isAlreadyDeprecated) {
+        if (!isAlreadyDeprecated && shouldApplyChanges) {
             // don't deprecate and don't override the message if the class is already deprecated
             val deprecatedAnnotation = super.visitAnnotation(DEPRECATED_ANNOTATION_DESC, true)
             deprecatedAnnotation.visit("message", deprecationMessage)
