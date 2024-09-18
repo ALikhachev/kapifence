@@ -7,6 +7,7 @@ import proguard.util.NameParser
 import kotlin.metadata.hasAnnotations
 import kotlin.metadata.jvm.KotlinClassMetadata
 import kotlin.metadata.jvm.getterSignature
+import kotlin.metadata.jvm.syntheticMethodForAnnotations
 
 class DeprecatingClassFields(
     classWriter: ClassWriter,
@@ -15,7 +16,7 @@ class DeprecatingClassFields(
 ) : BaseVisitor(classWriter) {
 
     private val shouldApplyChangesMap = mutableMapOf<String, Boolean>()
-    private lateinit var kotlinMetadata: Metadata
+    private lateinit var kotlinMetadata: KotlinClassMetadata
 
     override fun visitField(
         access: Int,
@@ -37,9 +38,9 @@ class DeprecatingClassFields(
 
         val originalVisitor = super.visitField(resultAccess, name, descriptor, signature, value)
 
-        if (shouldBeDeprecated && KotlinClassMetadata.Companion.readStrict(kotlinMetadata) is KotlinClassMetadata.Class) {
-            return DeprecatingFieldVisitor(originalVisitor)
-        }
+//        if (shouldBeDeprecated && KotlinClassMetadata.Companion.readStrict(kotlinMetadata) is KotlinClassMetadata.Class) {
+//            return DeprecatingFieldVisitor(originalVisitor)
+//        }
 
         return originalVisitor
     }
@@ -51,15 +52,21 @@ class DeprecatingClassFields(
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
-        val metadata = KotlinClassMetadata.Companion.readStrict(kotlinMetadata)
-        if (metadata is KotlinClassMetadata.Class) {
-            val kClass = metadata.kmClass
+        val kotlinMetadata = kotlinMetadata
+        if (kotlinMetadata is KotlinClassMetadata.Class) {
+            val kClass = kotlinMetadata.kmClass
             val property = kClass.properties.filter { property ->
                 shouldApplyChangesMap[property.name] == true && property.getterSignature?.name == methodName
             }.firstOrNull()
             if (property != null) {
                 property.getter.hasAnnotations = true
-                return DeprecatingMethodVisitor(super.visitMethod(access or Opcodes.ACC_DEPRECATED, methodName, descriptor, signature, exceptions))
+                property.hasAnnotations = true
+//                property.getExtension()
+                property.syntheticMethodForAnnotations = property.getterSignature!!.copy(name = "${property.getterSignature!!.name}\$annotations")
+                val syntheticFieldAccess = access or Opcodes.ACC_SYNTHETIC or Opcodes.ACC_DEPRECATED
+                val newVisitor = DeprecatingMethodVisitor(this.visitMethod(syntheticFieldAccess, "${property.getterSignature!!.name}\$annotations", descriptor, signature, exceptions))
+                newVisitor.visitEnd()
+                return super.visitMethod(access or Opcodes.ACC_DEPRECATED, methodName, descriptor, signature, exceptions)
             }
         }
 
@@ -67,8 +74,7 @@ class DeprecatingClassFields(
     }
 
     override fun visitEnd() {
-        val metadata = KotlinClassMetadata.Companion.readStrict(kotlinMetadata)
-        writeAnnotation(metadata.write())
+        writeAnnotation(kotlinMetadata.write())
     }
 
     private inner class DeprecatingMethodVisitor(originalVisitor: MethodVisitor) : MethodVisitor(Opcodes.ASM9, originalVisitor) {
@@ -149,7 +155,7 @@ class DeprecatingClassFields(
 
         @Suppress("UNCHECKED_CAST")
         override fun visitEnd() {
-            kotlinMetadata = Metadata(
+            val header = Metadata(
                 kind = values["k"] as Int? ?: 1,
                 metadataVersion = values["mv"] as IntArray? ?: intArrayOf(),
                 data1 = values["d1"] as Array<String>? ?: emptyArray(),
@@ -158,6 +164,7 @@ class DeprecatingClassFields(
                 packageName = values["pn"] as String? ?: "",
                 extraInt = values["xi"] as Int? ?: 0
             )
+            kotlinMetadata = KotlinClassMetadata.Companion.readStrict(header)
         }
     }
 
