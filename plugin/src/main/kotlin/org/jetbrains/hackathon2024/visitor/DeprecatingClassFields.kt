@@ -37,10 +37,6 @@ class DeprecatingClassFields(
 
         val originalVisitor = super.visitField(resultAccess, name, descriptor, signature, value)
 
-//        if (shouldBeDeprecated && KotlinClassMetadata.Companion.readStrict(kotlinMetadata) is KotlinClassMetadata.Class) {
-//            return DeprecatingFieldVisitor(originalVisitor)
-//        }
-
         return originalVisitor
     }
 
@@ -60,7 +56,6 @@ class DeprecatingClassFields(
             if (property != null) {
                 property.getter.hasAnnotations = true
                 property.hasAnnotations = true
-//                property.getExtension()
                 property.syntheticMethodForAnnotations =
                     property.getterSignature!!.copy(name = "${property.getterSignature!!.name}\$annotations")
                 val syntheticFieldAccess = access or Opcodes.ACC_SYNTHETIC or Opcodes.ACC_DEPRECATED

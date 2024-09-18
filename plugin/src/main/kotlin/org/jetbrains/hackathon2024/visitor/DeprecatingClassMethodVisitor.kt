@@ -20,7 +20,7 @@ class DeprecatingClassMethodVisitor(
     private val specifications: List<MemberSpecification>,
 ) : BaseVisitor(classWriter) {
 
-    private val shouldApplyChangesMap = mutableMapOf<String, Boolean>()
+    private val shouldApplyChangesMap = mutableMapOf<Pair<String, String>, Boolean>()
 
     override fun visitMethod(
         access: Int,
@@ -35,7 +35,7 @@ class DeprecatingClassMethodVisitor(
                     spec.requiredSetAccessFlags and access == spec.requiredSetAccessFlags &&
                     spec.requiredUnsetAccessFlags and access == 0
         }
-        shouldApplyChangesMap[name] = shouldBeDeprecated
+        shouldApplyChangesMap[name to descriptor] = shouldBeDeprecated
 
         val resultAccess = if (shouldBeDeprecated) access or Opcodes.ACC_DEPRECATED else access
 
@@ -55,7 +55,7 @@ class DeprecatingClassMethodVisitor(
             val kClass = metadata.kmClass
 
             kClass.constructors.forEach{ constructor ->
-                if (shouldApplyChangesMap[constructor.signature?.name] == true) {
+                if (shouldApplyChangesMap[constructor.signature?.name to constructor.signature?.descriptor] == true) {
                     constructor.hasAnnotations = true
                 }
             }
@@ -66,7 +66,7 @@ class DeprecatingClassMethodVisitor(
                 } else {
                     function.name
                 }
-                if (shouldApplyChangesMap[bytecodeName] == true) {
+                if (shouldApplyChangesMap[bytecodeName to function.signature?.descriptor] == true) {
                     function.hasAnnotations = true
                 }
             }
