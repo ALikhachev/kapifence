@@ -3,45 +3,78 @@
  */
 package org.jetbrains.hackathon2024
 
+import org.gradle.testkit.runner.BuildResult
 import java.io.File
-import kotlin.test.assertTrue
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.io.TempDir
+import kotlin.test.assertEquals
 
-/**
- * A simple functional test for the 'org.example.greeting' plugin.
- */
 class KapiFencePluginFunctionalTest {
 
     @field:TempDir
     lateinit var projectDir: File
 
-    private val buildFile by lazy { projectDir.resolve("build.gradle") }
-    private val settingsFile by lazy { projectDir.resolve("settings.gradle") }
+    fun copyProjectTemplate(resourceDirectoryName: String, targetDirectory: File) {
+        val projectResource =
+            Thread.currentThread().contextClassLoader.getResource("projects/$resourceDirectoryName/")
+                ?: error("Resource $resourceDirectoryName not found")
+        val resourcePath =
+            Paths.get(projectResource.toURI())
+        println("Copying project template from $resourcePath to $targetDirectory")
+        Files.walk(resourcePath).forEach { source ->
+            val destination =
+                targetDirectory.toPath().resolve(resourcePath.relativize(source).toString())
+            Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
+        }
+        println("Copying finished")
+    }
 
-    @Test
-    fun `can run task`() {
-        // Set up the test build
-        settingsFile.writeText("")
-        buildFile.writeText(
-            //language=Gradle
-            """
-            plugins {
-                id('org.jetbrains.hackathon2024.kapifence')
-            }
-            """.trimIndent()
-        )
-
-        // Run the build
+    fun build(project: String, vararg arguments: String, assertions: (BuildResult) -> Unit = {}) {
+        copyProjectTemplate(project, projectDir)
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("greeting")
+        runner.withArguments(*arguments)
         runner.withProjectDir(projectDir)
+        println("Running build with arguments: ${arguments.joinToString(" ")}")
         val result = runner.build()
+        assertions(result)
+    }
 
-        // Verify the result
-        assertTrue(result.output.contains("Hello from plugin 'org.example.greeting'"))
+    fun buildAndFail(project: String, vararg arguments: String, assertions: BuildResult.() -> Unit = {}) {
+        copyProjectTemplate(project, projectDir)
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments(*arguments)
+        runner.withProjectDir(projectDir)
+        println("Running build with arguments: ${arguments.joinToString(" ")}")
+        val result = runner.buildAndFail()
+        assertions(result)
+    }
+
+    @DisplayName("Works with Kotlin/JVM")
+    @Test
+    fun testKotlinJvm() {
+        buildAndFail("kotlin-jvm", "compileKotlin") {
+            assert(output.contains("'class AbstractSet<out E> : AbstractCollection<E>, Set<E>' is deprecated. The class is deprecated within the project by KapiFence plugin."))
+            assertEquals(TaskOutcome.FAILED, task(":compileKotlin")?.outcome)
+        }
+    }
+
+    @DisplayName("Works with Java")
+    @Test
+    fun testJava() {
+        buildAndFail("java", "compileJava") {
+            assert(output.contains("warning: [deprecation] kotlin.collections.AbstractSet in kotlin.collections has been deprecated"))
+            assertEquals(TaskOutcome.FAILED, task(":compileJava")?.outcome)
+        }
     }
 }
