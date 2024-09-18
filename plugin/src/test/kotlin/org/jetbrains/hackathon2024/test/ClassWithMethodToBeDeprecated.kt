@@ -7,6 +7,4 @@ class ClassWithMethodToBeDeprecated {
     internal fun methodToBeDeprecatedInternal() {}
 
     private fun methodNotDeprecated() {}
-
-    private val propertyNotDeprecated = ""
 }
