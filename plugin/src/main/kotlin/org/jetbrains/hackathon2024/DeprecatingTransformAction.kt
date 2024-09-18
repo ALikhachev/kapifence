@@ -11,9 +11,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.jetbrains.hackathon2024.bytecode.DeprecatingClassTransformer
+import org.jetbrains.hackathon2024.parser.ProguardParser
+import org.jetbrains.hackathon2024.processor.SpecificationProcessor
+import org.jetbrains.hackathon2024.visitor.DeprecatingClassVisitor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import proguard.KeepClassSpecification
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
@@ -46,12 +49,12 @@ internal abstract class DeprecatingTransformAction :
                     file.inputStream().use { inputStream ->
                         val classReader = ClassReader(inputStream)
                         val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES)
-                        val classVisitor = DeprecatingClassTransformer(
-                            classWriter,
-                            parameters.deprecationMessage.orNull
+                        // TODO(Dmitrii Krasnov): remove hardcode
+                        val keepClassSpecifications = ProguardParser().parse("class kotlin.collections.AbstractSet{}")
+                        SpecificationProcessor().process(
+                            classReader, classWriter, keepClassSpecifications, parameters.deprecationMessage.orNull
                                 ?: "The class is deprecated within the project by KapiFence plugin"
                         )
-                        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
                         val entry = ZipEntry(details.relativePath.pathString)
                         resultZip.putNextEntry(entry)
                         resultZip.write(classWriter.toByteArray())
