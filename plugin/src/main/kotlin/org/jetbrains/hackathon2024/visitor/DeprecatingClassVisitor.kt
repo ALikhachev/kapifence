@@ -80,32 +80,6 @@ class DeprecatingClassVisitor(
             }
         }
 
-        private fun writeAnnotation(metadata: Metadata) {
-            cv.visitAnnotation(METADATA_ANNOTATION_DESC, true).apply {
-                visit("k", metadata.kind)
-                visitArray("mv").apply {
-                    metadata.metadataVersion.forEach { visit(null, it) }
-                    visitEnd()
-                }
-                visitArray("d1").apply {
-                    metadata.data1.forEach { visit(null, it) }
-                    visitEnd()
-                }
-                visitArray("d2").apply {
-                    metadata.data2.forEach { visit(null, it) }
-                    visitEnd()
-                }
-                if (metadata.extraString.isNotEmpty()) {
-                    visit("xs", metadata.extraString)
-                }
-                if (metadata.packageName.isNotEmpty()) {
-                    visit("pn", metadata.packageName)
-                }
-                visit("xi", metadata.extraInt)
-                visitEnd()
-            }
-        }
-
         @Suppress("UNCHECKED_CAST")
         override fun visitEnd() {
             val header = Metadata(
@@ -127,10 +101,5 @@ class DeprecatingClassVisitor(
 
             writeAnnotation(metadata.write())
         }
-    }
-
-    companion object {
-        private const val DEPRECATED_ANNOTATION_DESC = "Lkotlin/Deprecated;"
-        private const val METADATA_ANNOTATION_DESC = "Lkotlin/Metadata;"
     }
 }

@@ -16,7 +16,7 @@ class DeprecatingClassVisitorTest {
     fun testClassVisitor() {
         val classFilePath = "build/classes/kotlin/test/org/jetbrains/hackathon2024/test/ClassToBeDeprecated.class"
         val someClass = File(classFilePath)
-        val outputFile = kotlin.io.path.createTempFile().toFile()
+        val outputFile = kotlin.io.path.createTempFile(suffix = ".class").toFile()
         someClass.inputStream().use { inputStream ->
             val classReader = ClassReader(inputStream)
             val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES)
