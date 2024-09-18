@@ -11,6 +11,8 @@ import org.gradle.api.Plugin
  */
 class KapiFencePlugin: Plugin<Project> {
     override fun apply(project: Project) {
+        project.configureDeprecationsAttribute()
+        project.registerDeprecationsTransform()
         // Register a task
         project.tasks.register("greeting") { task ->
             task.doLast {
