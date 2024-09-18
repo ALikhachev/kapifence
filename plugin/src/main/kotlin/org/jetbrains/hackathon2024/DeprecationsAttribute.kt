@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.plugins.JavaPlugin
+import org.jetbrains.hackathon2024.dsl.KapiFenceRootBuilder
 import java.io.Serializable
 
 interface DeprecationsAttribute : Named, Serializable {
@@ -52,7 +53,7 @@ internal fun Project.configureDeprecationsAttribute() {
     }
 }
 
-internal fun Project.registerDeprecationsTransform() {
+internal fun Project.registerDeprecationsTransform(dslBuilder: KapiFenceRootBuilder) {
     with(dependencies) {
         registerTransform(DeprecatingTransformAction::class.java) {
             it.from.attribute(
@@ -69,6 +70,10 @@ internal fun Project.registerDeprecationsTransform() {
                     DeprecationsAttribute.WITH_DEPRECATIONS
                 )
             )
+            it.parameters.deprecationMessage.set(dslBuilder.deprecationMessage)
+            it.parameters.proguardConfig.set(project.provider {
+                dslBuilder.records
+            })
         }
     }
 }

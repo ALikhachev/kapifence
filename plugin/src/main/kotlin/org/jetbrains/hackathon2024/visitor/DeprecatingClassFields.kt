@@ -83,7 +83,9 @@ class DeprecatingClassFields(
     }
 
     override fun visitEnd() {
-        writeAnnotation(kotlinMetadata.write())
+        kotlinMetadata?.let {
+            writeAnnotation(it.write())
+        }
     }
 
     private inner class DeprecatingMethodVisitor(originalVisitor: MethodVisitor) :

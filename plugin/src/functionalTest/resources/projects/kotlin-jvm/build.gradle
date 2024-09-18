@@ -7,6 +7,10 @@ repositories {
     mavenCentral()
 }
 
+kapiFence {
+    deprecateClass("kotlin.collections.AbstractSet", null)
+}
+
 kotlin {
     compilerOptions {
         allWarningsAsErrors = true

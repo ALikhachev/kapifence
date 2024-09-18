@@ -72,7 +72,9 @@ class DeprecatingClassMethodVisitor(
             }
         }
 
-        writeAnnotation(metadata.write())
+        kotlinMetadata?.let {
+            writeAnnotation(it.write())
+        }
     }
 
     private inner class DeprecatingMethodVisitor(originalVisitor: MethodVisitor) : MethodVisitor(Opcodes.ASM9, originalVisitor) {
