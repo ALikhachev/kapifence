@@ -19,7 +19,7 @@ class SpecificationProcessor {
     ) {
         specifications.forEach { specification ->
             when {
-                specification.methodSpecifications.isNotEmpty() -> {
+                specification.methodSpecifications?.isNotEmpty() ?: false -> {
                     val matchers = specification.methodSpecifications.map { methodSpecification ->
                         NameParser().parse(methodSpecification.descriptor)
                     }
@@ -29,7 +29,7 @@ class SpecificationProcessor {
                     )
                 }
 
-                specification.fieldSpecifications.isNotEmpty() -> {
+                specification.fieldSpecifications?.isNotEmpty() ?: false -> {
                     // TODO(Dmitrii Krasnov): fields is not empty
                 }
 
