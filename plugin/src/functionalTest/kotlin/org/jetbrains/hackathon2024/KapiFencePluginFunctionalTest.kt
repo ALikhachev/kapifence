@@ -55,7 +55,6 @@ class KapiFencePluginFunctionalTest {
         runner.withPluginClasspath()
         runner.withArguments(*arguments)
         runner.withProjectDir(projectDir)
-        runner.withDebug(true)
         println("Running build with arguments: ${arguments.joinToString(" ")}")
         val result = runner.buildAndFail()
         assertions(result)
