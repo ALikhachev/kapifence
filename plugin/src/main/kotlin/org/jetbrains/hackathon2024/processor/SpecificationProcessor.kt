@@ -1,7 +1,7 @@
 package org.jetbrains.hackathon2024.processor
 
 import org.jetbrains.hackathon2024.visitor.DeprecatingClassVisitor
-import org.jetbrains.hackathon2024.visitor.DeprecatingMethodVisitor
+import org.jetbrains.hackathon2024.visitor.DeprecatingClassMethodVisitor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import proguard.KeepClassSpecification
@@ -24,7 +24,7 @@ class SpecificationProcessor {
                         ClassNameParser().parse(methodSpecification.name) to NameParser().parse(methodSpecification.descriptor)
                     }
                     classReader.accept(
-                        DeprecatingMethodVisitor(cw, deprecationMessage, specification.methodSpecifications),
+                        DeprecatingClassMethodVisitor(cw, deprecationMessage, specification.methodSpecifications),
                         ClassReader.EXPAND_FRAMES
                     )
                 }
