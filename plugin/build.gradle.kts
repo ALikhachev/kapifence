@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.proguard.base)
     implementation(libs.kotlin.metadata)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
 
 }
 

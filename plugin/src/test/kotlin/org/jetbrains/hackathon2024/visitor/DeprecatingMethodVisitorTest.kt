@@ -1,34 +1,38 @@
 package org.jetbrains.hackathon2024.visitor
 
+import org.jetbrains.hackathon2024.parser.ProguardParser
 import org.jetbrains.hackathon2024.utils.parseClassFile
+import org.junit.jupiter.api.Test
+
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import proguard.util.ClassNameParser
-import java.io.BufferedReader
+import proguard.util.NameParser
 import java.io.File
-import java.io.InputStreamReader
-import java.util.stream.Collectors
-import kotlin.test.Test
-import kotlin.test.assertTrue
 
-class DeprecatingClassVisitorTest {
+class DeprecatingMethodVisitorTest {
+
     @Test
-    fun testClassVisitor() {
-        val classFilePath = "build/classes/kotlin/test/org/jetbrains/hackathon2024/test/ClassToBeDeprecated.class"
+    fun testMethodVisitor() {
+        val classFilePath = "build/classes/kotlin/test/org/jetbrains/hackathon2024/test/ClassWithMethodToBeDeprecated.class"
         val someClass = File(classFilePath)
-        val outputFile = kotlin.io.path.createTempFile().toFile()
+        val outputFile = kotlin.io.path.createTempFile(suffix = ".class").toFile()
+        val specification =
+            ProguardParser().parse("class org.jetbrains.hackathon2024.test.ClassWithMethodToBeDeprecated { public void *(); }").first()
         someClass.inputStream().use { inputStream ->
             val classReader = ClassReader(inputStream)
             val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES)
-            val classVisitor = DeprecatingClassVisitor(
+            val methodVisitor = DeprecatingMethodVisitor(
                 classWriter,
-                "Deprecated message",
-                ClassNameParser().parse("org/jetbrains/hackathon2024/**")
+                "Deprecated 1 message 1",
+//                specification.methodSpecifications.map { NameParser().parse(it.name) to ClassNameParser().parse(it.descriptor)},
+                specification.methodSpecifications,
             )
-            classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+            classReader.accept(methodVisitor, ClassReader.EXPAND_FRAMES)
             outputFile.writeBytes(classWriter.toByteArray())
         }
         val parsedClassFile = parseClassFile(outputFile.absolutePath)
+
         assert(
             parsedClassFile.contains(
                 """

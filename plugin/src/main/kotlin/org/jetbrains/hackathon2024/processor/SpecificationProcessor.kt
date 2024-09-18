@@ -21,10 +21,10 @@ class SpecificationProcessor {
             when {
                 specification.methodSpecifications?.isNotEmpty() ?: false -> {
                     val matchers = specification.methodSpecifications.map { methodSpecification ->
-                        NameParser().parse(methodSpecification.descriptor)
+                        ClassNameParser().parse(methodSpecification.name) to NameParser().parse(methodSpecification.descriptor)
                     }
                     classReader.accept(
-                        DeprecatingMethodVisitor(cw, deprecationMessage, matchers),
+                        DeprecatingMethodVisitor(cw, deprecationMessage, specification.methodSpecifications),
                         ClassReader.EXPAND_FRAMES
                     )
                 }
