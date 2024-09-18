@@ -7,4 +7,9 @@ class ClassWithMethodToBeDeprecated {
     internal fun methodToBeDeprecatedInternal() {}
 
     private fun methodNotDeprecated() {}
+
+    @Deprecated("FAKE")
+    val deprecatedField: String = ""
+        @JvmName("getBread")
+        get
 }

@@ -37,7 +37,7 @@ class DeprecatingClassFields(
 
         val originalVisitor = super.visitField(resultAccess, name, descriptor, signature, value)
 
-        if (shouldBeDeprecated && KotlinClassMetadata.Companion.readStrict(kotlinMetadata) !is KotlinClassMetadata.Class) {
+        if (shouldBeDeprecated && KotlinClassMetadata.Companion.readStrict(kotlinMetadata) is KotlinClassMetadata.Class) {
             return DeprecatingFieldVisitor(originalVisitor)
         }
 
