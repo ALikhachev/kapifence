@@ -42,3 +42,5 @@ bin/
 .DS_Store
 # Ignore Gradle build output directory
 build
+
+/local-repo

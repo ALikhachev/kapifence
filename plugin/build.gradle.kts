@@ -1,7 +1,11 @@
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.kotlin.jvm)
+    `maven-publish`
 }
+
+group = "org.jetbrains.hackathon2024"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -13,6 +17,10 @@ dependencies {
     implementation(libs.kotlin.metadata)
     testImplementation(libs.junit.jupiter)
 
+}
+
+kotlin {
+    jvmToolchain(8)
 }
 
 testing {
@@ -56,4 +64,13 @@ gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 tasks.named<Task>("check") {
     // Include functionalTest as part of the check lifecycle
     dependsOn(testing.suites.named("functionalTest"))
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "localRepo"
+            url = uri("$rootDir/local-repo")
+        }
+    }
 }
