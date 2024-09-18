@@ -11,6 +11,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.20")
 }
 
+kapiFence {
+    deprecateClass("kotlin.collections.AbstractSet", null)
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-Xlint:deprecation' << '-Werror'
 }

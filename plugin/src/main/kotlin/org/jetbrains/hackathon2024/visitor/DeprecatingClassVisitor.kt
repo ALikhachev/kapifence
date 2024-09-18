@@ -45,7 +45,9 @@ class DeprecatingClassVisitor(
             kClass.hasAnnotations = true
         }
 
-        writeAnnotation(metadata.write())
+        kotlinMetadata?.let {
+            writeAnnotation(it.write())
+        }
         super.visitEnd()
         if (!isAlreadyDeprecated && shouldApplyChanges) {
             // don't deprecate and don't override the message if the class is already deprecated

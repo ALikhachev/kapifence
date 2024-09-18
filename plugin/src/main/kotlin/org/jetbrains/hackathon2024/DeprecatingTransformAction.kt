@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -17,6 +18,7 @@ import org.jetbrains.hackathon2024.visitor.DeprecatingClassVisitor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import proguard.KeepClassSpecification
+import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
@@ -27,6 +29,9 @@ internal abstract class DeprecatingTransformAction :
         @get:Optional
         @get:Input
         val deprecationMessage: Property<String>
+
+        @get:Input
+        val proguardConfig: ListProperty<String>
     }
 
     private val logger = Logging.getLogger(DeprecatingTransformAction::class.java)
@@ -44,22 +49,26 @@ internal abstract class DeprecatingTransformAction :
         ZipOutputStream(outputFile.outputStream()).use { resultZip ->
             archiveOperations.zipTree(inputFile).visit { details ->
                 val file = details.file
-                if (file.endsWith("AbstractSet.class")) { // TODO: matching logic
-                    logger.info("Deprecating $file") // TODO: replace with FQN
-                    file.inputStream().use { inputStream ->
+                if (file.path.endsWith(".class")) {
+                    logger.info("Transforming ${file.name}")
+                    // not optimal :(
+                    var inputStream: InputStream = file.inputStream()
+                    var lastBytes: ByteArray? = null
+                    for (proguardConfig in parameters.proguardConfig.get()) {
                         val classReader = ClassReader(inputStream)
                         val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES)
-                        // TODO(Dmitrii Krasnov): remove hardcode
-                        val keepClassSpecifications = ProguardParser().parse("class kotlin.collections.AbstractSet{}")
+                        logger.info("Handling $proguardConfig")
                         SpecificationProcessor().process(
-                            classReader, classWriter, keepClassSpecifications, parameters.deprecationMessage.orNull
+                            classReader, classWriter, ProguardParser().parse(proguardConfig), parameters.deprecationMessage.orNull
                                 ?: "The class is deprecated within the project by KapiFence plugin"
                         )
-                        val entry = ZipEntry(details.relativePath.pathString)
-                        resultZip.putNextEntry(entry)
-                        resultZip.write(classWriter.toByteArray())
-                        resultZip.closeEntry()
+                        lastBytes = classWriter.toByteArray()
+                        inputStream = classWriter.toByteArray().inputStream()
                     }
+                    val entry = ZipEntry(details.relativePath.pathString)
+                    resultZip.putNextEntry(entry)
+                    resultZip.write(lastBytes!!)
+                    resultZip.closeEntry()
                 } else {
                     val archivePath = if (details.isDirectory) "${details.path}/" else details.path
                     val entry = ZipEntry(archivePath)

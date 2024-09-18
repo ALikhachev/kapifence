@@ -5,12 +5,15 @@ package org.jetbrains.hackathon2024
 
 import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.jetbrains.hackathon2024.dsl.KapiFenceRootBuilder
 
 class KapiFencePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         with(project) {
+            val dslBuilder = KapiFenceRootBuilder(this)
+            project.extensions.add(KapiFenceRootDsl::class.java, "kapiFence", dslBuilder)
             configureDeprecationsAttribute()
-            registerDeprecationsTransform()
+            registerDeprecationsTransform(dslBuilder)
         }
     }
 }

@@ -10,7 +10,8 @@ abstract class BaseVisitor(
     classWriter: ClassWriter,
 ) : ClassVisitor(Opcodes.ASM9, classWriter) {
 
-    protected lateinit var kotlinMetadata: KotlinClassMetadata
+    protected var kotlinMetadata: KotlinClassMetadata? = null
+        private set
 
     /**
      * Reads the existing [Metadata] and overrides it.
