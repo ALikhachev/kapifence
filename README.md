@@ -51,7 +51,7 @@ kapiFence {
         deprecateConstructor(ArgumentType.Int, ArgumentType.Int) // deprecate `OldBadClass(int1: Int, int2: Int)` constructor
         deprecateProperty("oldAwfulProperty") // deprecate `oldAwfulProperty` property in the `org.example.OldBadClass`
         deprecateFun("oldAwfulFun") // deprecate `oldAwfulFun` function in the `org.example.OldBadClass`
-        deprecateFun("oldFunWithOverloads", ArgumentType.Wildcard) // deprecate `oldFunWithOverloads` function with any argument type
+        deprecateFun("oldFunWithOverloads", ArgumentType.Wildcard) // deprecate `oldFunWithOverloads` functions with any argument type
     }
 }
 ```
