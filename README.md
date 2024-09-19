@@ -27,7 +27,7 @@ pluginManagement {
 }
 ```
 
-[How to generate token on GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)(you need only `read:packages` scope)
+[How to generate token on GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic). You need only the `read:packages` scope.
 
 2) In `build.gradle.kts` add KapiFence plugin:
 
@@ -37,65 +37,21 @@ plugins {
 }
 ```
 
-3) Describe what you would like to deprecate in `build.gradle.kts`:
+3) Describe what would you like to deprecate in `build.gradle.kts`:
 ```kotlin
 kapiFence {
     deprecateClass("org.example.MyAwfulClass") // Deprecate the class `org.example.MyAwfulClass`
     deprecateMembers("org.example.MyAwesomeClass") {
         deprecateConstructor(ArgumentType.Int, ArgumentType.Int) // deprecate `MyAwesomeClass(int1: Int, int2: Int)` constructor
         deprecateProperty("oldAwfulProperty") // deprecate `oldAwfulProperty` property in the `org.example.MyAwesomeClass`
-        deprecateFun("oldAwfulFun") // deprecate `oldAwfulFun` property in the `org.example.MyAwesomeClass`
+        deprecateFun("oldAwfulFun") // deprecate `oldAwfulFun` function with no arguments in the `org.example.MyAwesomeClass`
+        deprecateFun("oldAwfulFun", ArgumentType.Class("org.example.MyAwfulClass")) // deprecate `oldAwfulFun` function overload
     }
     deprecateClass("org.example.OldBadClass") { // Deprecate the class `org.example.OldBadClass`
         deprecateConstructor(ArgumentType.Int, ArgumentType.Int) // deprecate `OldBadClass(int1: Int, int2: Int)` constructor
         deprecateProperty("oldAwfulProperty") // deprecate `oldAwfulProperty` property in the `org.example.OldBadClass`
-        deprecateFun("oldAwfulFun") // deprecate `oldAwfulFun` property in the `org.example.OldBadClass`
-    }
-}
-```
-
-#### With Groovy DSL in Gradle
-
-1) Add KapiFence plugin repository to your `pluginManagement` block in `settings.gradle` file:
-
-```groovy
-pluginManagement {
-    repositories {
-        maven {
-            url 'https://maven.pkg.github.com/ALikhachev/KapiFence'
-            credentials {
-                username = 'your_github_username'
-                password = 'your_github_token'
-            }
-        }
-    }
-}
-```
-
-[How to generate token on GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)(you need only `read:packages` scope)
-
-2) In `build.gradle` add KapiFence plugin:
-```groovy
-plugins {
-    id 'org.jetbrains.hackathon2024.kapifence' version '0.0.1'
-}
-```
-
-3) Describe what you would like to deprecate in `build.gradle`:
-```groovy
-kapiFence {
-    deprecateClass('org.example.MyAwfulClass') // Deprecate the class `org.example.MyAwfulClass`
-
-    deprecateMembers('org.example.MyAwesomeClass') {
-        deprecateConstructor(ArgumentType.Int, ArgumentType.Int) // deprecate `MyAwesomeClass(int1: Int, int2: Int)` constructor
-        deprecateProperty('oldAwfulProperty') // deprecate `oldAwfulProperty` property in the `org.example.MyAwesomeClass`
-        deprecateFun('oldAwfulFun') // deprecate `oldAwfulFun` function in the `org.example.MyAwesomeClass`
-    }
-
-    deprecateClass('org.example.OldBadClass') { // Deprecate the class `org.example.OldBadClass`
-        deprecateConstructor(ArgumentType.Int, ArgumentType.Int) // deprecate `OldBadClass(int1: Int, int2: Int)` constructor
-        deprecateProperty('oldAwfulProperty') // deprecate `oldAwfulProperty` property in the `org.example.OldBadClass`
-        deprecateFun('oldAwfulFun') // deprecate `oldAwfulFun` function in the `org.example.OldBadClass`
+        deprecateFun("oldAwfulFun") // deprecate `oldAwfulFun` function in the `org.example.OldBadClass`
+        deprecateFun("oldFunWithOverloads", ArgumentType.Wildcard) // deprecate `oldFunWithOverloads` function with any argument type
     }
 }
 ```
