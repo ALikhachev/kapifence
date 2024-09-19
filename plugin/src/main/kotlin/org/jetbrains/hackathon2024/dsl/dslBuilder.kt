@@ -23,19 +23,27 @@ internal class KapiFenceRootBuilder(project: Project) : KapiFenceRootDsl {
         }
     }
 
+    private fun String.maybeWrapIntoClass(className: String): String? {
+        return if (isEmpty()) {
+            null
+        } else {
+            "class $className {\n$this\n}"
+        }
+    }
+
     override fun deprecateMembers(
         name: String,
         body: KapiFenceClassDsl.() -> Unit,
     ) {
         val funBuilder = StringBuilder()
-        funBuilder.appendLine("class $name {")
         val propBuilder = StringBuilder()
-        propBuilder.appendLine("class $name {")
         KapiFenceClassBuilder(funBuilder, propBuilder).body()
-        funBuilder.appendLine("}")
-        propBuilder.appendLine("}")
-        records_.add(funBuilder.toString())
-        records_.add(propBuilder.toString())
+        funBuilder.toString().maybeWrapIntoClass(name)?.let {
+            records_.add(it)
+        }
+        propBuilder.toString().maybeWrapIntoClass(name)?.let {
+            records_.add(it)
+        }
     }
 }
 
