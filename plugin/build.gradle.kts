@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.jetbrains.hackathon2024"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenCentral()
