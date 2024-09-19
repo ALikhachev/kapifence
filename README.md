@@ -1,3 +1,1 @@
-# KapiFence
-
-![logo](logo.png)
+![KapiFence](logo.png)
