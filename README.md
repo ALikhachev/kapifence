@@ -33,7 +33,7 @@ pluginManagement {
 
 ```koltin
 plugins {
-    id("org.jetbrains.hackathon2024.kapifence") version "0.0.1"
+    id("org.jetbrains.hackathon2024.kapifence") version "0.0.2"
 }
 ```
 
