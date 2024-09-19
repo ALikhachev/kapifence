@@ -49,7 +49,7 @@ internal abstract class DeprecatingTransformAction :
         ZipOutputStream(outputFile.outputStream()).use { resultZip ->
             archiveOperations.zipTree(inputFile).visit { details ->
                 val file = details.file
-                if (file.path.endsWith(".class")) {
+                if (file.path.endsWith(".class") && parameters.proguardConfig.get().isNotEmpty()) {
                     logger.info("Transforming ${file.name}")
                     // not optimal :(
                     var inputStream: InputStream = file.inputStream()
